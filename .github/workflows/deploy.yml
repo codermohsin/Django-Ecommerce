@@ -1,36 +1,45 @@
-name: Django Selenium Tests
+name: Selenium Signup Test
 
 on:
   push:
     branches:
-      - master
+      - main
+  workflow_dispatch:
 
 jobs:
-  selenium-tests:
+  selenium-test:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.13
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.13"
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install selenium webdriver-manager pytest
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install selenium webdriver-manager
 
-      - name: Start Django server
-        run: |
-          python manage.py migrate
-          python manage.py runserver 0.0.0.0:8000 &
-          sleep 5  # wait for server to start
+    - name: Install Google Chrome
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y wget unzip xvfb libxi6 libgconf-2-4
+        wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+        sudo dpkg -i google-chrome-stable_current_amd64.deb || sudo apt-get -f install -y
 
-      - name: Run Selenium tests
-        env:
-          DISPLAY: :99
-        run: |
-          pytest test/signup.py
+    - name: Run Django server
+      run: |
+        export DISPLAY=:99
+        python manage.py migrate
+        python manage.py runserver 0.0.0.0:8000 &
+        sleep 5  # Give server time to start
+
+    - name: Run Selenium script
+      run: |
+        export DISPLAY=:99
+        python test/signup.py
