@@ -6,32 +6,47 @@ on:
       - master
 
 jobs:
-  test:
+  selenium-tests:
     runs-on: ubuntu-latest
 
+    services:
+      # Optional: if you use a database like Postgres/MySQL, define it here
+      # postgres:
+      #   image: postgres:15
+      #   ports: [5432:5432]
+      #   env:
+      #     POSTGRES_DB: test_db
+      #     POSTGRES_USER: user
+      #     POSTGRES_PASSWORD: password
+      #   options: >-
+      #     --health-cmd pg_isready
+      #     --health-interval 10s
+      #     --health-timeout 5s
+      #     --health-retries 5
+
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: 3.13
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.13
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install selenium webdriver-manager pytest
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install selenium webdriver-manager pytest
 
-    - name: Install Chrome
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y wget unzip xvfb libxi6 libnss3 libxss1 libglib2.0-0 libgtk-3-0 fonts-liberation libappindicator3-1
-        wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-        sudo dpkg -i google-chrome-stable_current_amd64.deb || sudo apt-get install -f -y
+      - name: Start Django server
+        run: |
+          python manage.py migrate
+          python manage.py runserver 0.0.0.0:8000 &
+          sleep 5  # wait for server to start
 
-    - name: Run Selenium tests
-      run: |
-        export DISPLAY=:99
-        pytest test/signup.py
+      - name: Run Selenium tests
+        env:
+          DISPLAY: :99
+        run: |
+          pytest test/signup.py
