@@ -7,7 +7,7 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04  # Use older Ubuntu to avoid libgconf-2-4 issue
 
     steps:
     - name: Checkout repository
@@ -26,22 +26,17 @@ jobs:
     - name: Install Chrome & dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y wget unzip xvfb libxi6 libgconf-2-4
-
-        # Install Google Chrome
+        sudo apt-get install -y wget unzip xvfb libxi6 libgconf-2-4 || true
         wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
         sudo dpkg -i google-chrome-stable_current_amd64.deb || sudo apt-get install -f -y
 
     - name: Install ChromeDriver
       run: |
         # Get Chrome major version
-        CHROME_MAJOR=$(google-chrome --version | grep -oP '\d+' | head -1)
-
-        # Get latest compatible Chromedriver
-        DRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_MAJOR")
-
-        # Download and install
-        wget "https://chromedriver.storage.googleapis.com/$DRIVER_VERSION/chromedriver_linux64.zip"
+        CHROME_MAJOR_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+' | head -1)
+        # Download matching ChromeDriver
+        LATEST_DRIVER=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_MAJOR_VERSION")
+        wget -N "https://chromedriver.storage.googleapis.com/$LATEST_DRIVER/chromedriver_linux64.zip"
         unzip chromedriver_linux64.zip
         sudo mv chromedriver /usr/local/bin/
         sudo chmod +x /usr/local/bin/
