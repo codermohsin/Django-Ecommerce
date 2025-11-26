@@ -16,8 +16,8 @@ from django.http import HttpResponseRedirect
 import random
 import string
 import stripe
-stripe.api_key = settings.STRIPE_SECRET_KEY
-
+import os
+stripe.api_key = os.environ.get('STRIPE_SECRET_KEY')
 
 def create_ref_code():
     return ''.join(random.choices(string.ascii_lowercase + string.digits, k=20))
