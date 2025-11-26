@@ -32,4 +32,4 @@ jobs:
         env:
           DISPLAY: :99
         run: |
-          pytest test/signup.py
+          python test/signup.py
