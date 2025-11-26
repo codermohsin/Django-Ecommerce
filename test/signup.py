@@ -25,7 +25,7 @@ def driver():
     yield driver
     driver.quit()
 
-def test_signup_form(driver, live_server):
+def test_signup_form(driver):
     username = "User_" + random_string(4)
     password = "Pass_" + random_string(8)
 
