@@ -7,6 +7,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 import random
 import string
 import time
+from django.conf import settings
 
 def random_string(length=6):
     return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
@@ -34,5 +35,6 @@ def test_signup_form(driver):
     
     time.sleep(3)
     # Example assertion: URL contains dashboard/home
-    assert "/dashboard/home" in driver.current_url
+ 
+    assert driver.current_url.endswith(settings.LOGIN_REDIRECT_URL)
     print(f"Signup successful: {username}")
